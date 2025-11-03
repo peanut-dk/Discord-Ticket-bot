@@ -236,17 +236,18 @@ function buildTicketEmbed(interaction, category, topic) {
     .setTimestamp();
 }
 
-async function ensureSingleTicket(interaction) {
+async function ensureSingleTicket(interaction, category) {
   const existingChannel = interaction.guild.channels.cache.find(
     (channel) =>
       channel.type === ChannelType.GuildText &&
       channel.name.startsWith(TICKET_CHANNEL_PREFIX) &&
-      channel.topic?.includes(interaction.user.id)
+      channel.topic?.includes(interaction.user.id) &&
+      channel.topic?.includes(`kategori: ${category.label}`)
   );
 
   if (existingChannel) {
     await interaction.reply({
-      content: `Du har allerede en åben ticket: ${existingChannel}`,
+      content: `Du har allerede en åben ticket i kategorien ${category.label}: ${existingChannel}`,
       ephemeral: true
     });
     return false;
@@ -288,7 +289,7 @@ function buildPermissionOverwrites(guild, ownerId, staffRoleId) {
 }
 
 async function createTicket(interaction, category, topic = null) {
-  if (!(await ensureSingleTicket(interaction))) {
+  if (!(await ensureSingleTicket(interaction, category))) {
     return;
   }
 
